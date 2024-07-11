@@ -1,0 +1,59 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.3/gsap.min.js"></script>
+
+
+<script>
+
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('logo-container');
+    const logos = Array.from(container.getElementsByClassName('logo-box'));
+    const totalLogos = logos.length;
+
+    function isMobileDevice() {
+        return window.innerWidth <= 768; // Adjust this breakpoint as needed
+    }
+
+    function swapLogos() {
+        // Check if it's a mobile device, and skip the swap if true
+        if (isMobileDevice()) {
+            return;
+        }
+
+        const randIndex1 = Math.floor(Math.random() * totalLogos);
+        let randIndex2;
+        do {
+            randIndex2 = Math.floor(Math.random() * totalLogos);
+        } while (randIndex1 === randIndex2);
+
+        const logo1 = logos[randIndex1];
+        const logo2 = logos[randIndex2];
+
+        // Calculate the translation values
+        const logo1Rect = logo1.getBoundingClientRect();
+        const logo2Rect = logo2.getBoundingClientRect();
+        const deltaX = logo2Rect.left - logo1Rect.left;
+        const deltaY = logo2Rect.top - logo1Rect.top;
+
+        // Swap positions with GSAP animation
+        gsap.to(logo1, { duration: 1, x: deltaX, y: deltaY });
+        gsap.to(logo2, { duration: 1, x: -deltaX, y: -deltaY, onComplete: () => {
+            // Actually swap elements in the DOM after animation completes
+            const logo1NextSibling = logo1.nextSibling;
+            const logo2NextSibling = logo2.nextSibling;
+
+            container.insertBefore(logo2, logo1NextSibling);
+            container.insertBefore(logo1, logo2NextSibling);
+
+            // Reset positions
+            gsap.set(logo1, { x: 0, y: 0 });
+            gsap.set(logo2, { x: 0, y: 0 });
+
+            // Update the logos array to reflect the new order
+            logos.splice(randIndex1, 1, logo2);
+            logos.splice(randIndex2, 1, logo1);
+        }});
+    }
+
+    // Set an interval to swap logos periodically
+    setInterval(swapLogos, 3000); // Adjust the interval as needed
+});
+</script>
